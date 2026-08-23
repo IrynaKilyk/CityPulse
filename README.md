@@ -1,5 +1,5 @@
 # CityPulse
-a dara engineering project for collecting,
+a data engineering project for collecting,
 
 ## Current Scope
 - Weather data ingestion
