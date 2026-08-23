@@ -1,2 +1,14 @@
 # CityPulse
-CityPulse -  a modern data engineering platform for collecting, processing, and analyzing urban from multiple sources 
+a dara engineering project for collecting,
+
+## Current Scope
+- Weather data ingestion
+- API integration
+- Data validation
+- CSV storage
+- Logging
+## Tech stack
+- Python
+- PostgresSQL
+- Docker
+- Airflow
