@@ -1,4 +1,5 @@
 import requests
+import json
 from db import get_connection
 
 
@@ -62,27 +63,32 @@ def insert_weather_data(conn, city_id: int, weather_data: dict):
 
 def main():
         
-        city_name = 'Lviv'
-        lat = 49.84
-        lan = 24.03
-
         conn = get_connection()
         print("Connecting successfully:", conn)
-
+        
+        with open("data/cities.json", "r", encoding="utf-8") as f:
+            my_data_list = json.load(f)
         try:
-            weather_data = fetch_weather(lat, lan)
-            city_id = get_or_create_city(conn, city_name, lat, lan)
-            insert_weather_data(conn, city_id, weather_data)
-            print(f'Information about city {city_name} successfully saved!')
+            for data in my_data_list:
 
+                city_name = data["name"]
+                lat = data["lat"]
+                lon = data["lon"]
+
+                weather_data = fetch_weather(lat, lon)
+                city_id = get_or_create_city(conn, city_name, lat, lon)
+                insert_weather_data(conn, city_id, weather_data)
+                print(f'Information about city {city_name} successfully saved!')
+                
         except Exception as e:
-            print(f'error: {e}')
-            conn.rollback()
-
+                print(f'error: {e}')
+                conn.rollback()
+                
         finally:
-            conn.close()
-            print('Connection with bd closed!')
-
+                conn.close()
+                print('Connection with bd closed!')
+                
+    
 if __name__ == "__main__":
     main()    
 
