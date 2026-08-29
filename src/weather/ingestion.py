@@ -2,8 +2,15 @@ import requests
 import json
 import sys
 import os
+import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+logging.basicConfig(
+     filename="logs/weather.log",
+     level=logging.INFO,
+     format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))# reminder to fix it
 
 from db import get_connection
 
@@ -69,7 +76,7 @@ def insert_weather_data(conn, city_id: int, weather_data: dict):
 def main():
         
         conn = get_connection()
-        print("Connecting successfully:", conn)
+        logging.info(f"Connecting successfully")
         
         with open("data/cities.json", "r", encoding="utf-8") as f:
             my_data_list = json.load(f)
@@ -83,15 +90,15 @@ def main():
                 weather_data = fetch_weather(lat, lon)
                 city_id = get_or_create_city(conn, city_name, lat, lon)
                 insert_weather_data(conn, city_id, weather_data)
-                print(f'Information about city {city_name} successfully saved!')
+                logging.info(f"Information about city {city_name} successfully saved!")
                 
         except Exception as e:
-                print(f'error: {e}')
+                logging.error(f'error: {e}')
                 conn.rollback()
                 
         finally:
                 conn.close()
-                print('Connection with bd closed!')
+                logging.info('Connection with bd closed!')
                 
     
 if __name__ == "__main__":
