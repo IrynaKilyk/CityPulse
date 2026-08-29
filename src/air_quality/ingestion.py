@@ -1,5 +1,4 @@
 import requests
-import json
 import sys
 import os
 import logging
@@ -12,7 +11,9 @@ logging.basicConfig(
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
 
-from db import get_connection
+from geocoding import get_coordinates
+from db import get_connection, get_or_create_city
+from config import TARGET_LOCATIONS
 
 def fetch_air_quality(lat:float, lon:float):
     url = "https://air-quality-api.open-meteo.com/v1/air-quality"
@@ -51,36 +52,27 @@ def insert_air_quality(conn, city_id: int, air_quality_data:dict):
             )
         conn.commit()
 
-def get_or_create_city(conn, city_name: str, lat: float, lon: float):
-    with conn.cursor() as cur:
-        cur.execute("""
-    INSERT INTO cities(city_name, latitude, longitude) 
-    VALUES(%s, %s, %s)
-    ON CONFLICT (city_name) DO NOTHING;""",
-        (city_name, lat, lon )
-    )
-    conn.commit()
-
-    with conn.cursor() as cur:
-        cur.execute("SELECT id from cities WHERE city_name = %s", (city_name,))
-        number_id =cur.fetchone()[0]
-    return number_id
 
 
 def main():
     conn = get_connection()
     logging.info("Connecting successfully")
 
-    with open('data/cities.json', 'r', encoding='utf-8') as f:
-        my_data_list =json.load(f)
+ 
     try:
-        for data in my_data_list:
-            city_name = data["name"]
-            lat = data["lat"]
-            lon = data["lon"]
+        for data in TARGET_LOCATIONS:
+            cords_data = get_coordinates(data["city"], data["region"], data["country"])
+            if not cords_data:
+                continue
 
-            air_quality_data = fetch_air_quality(lat, lon)
-            city_id = get_or_create_city(conn, city_name, lat, lon)
+            city_name = data["city"]
+            country = data["country"]
+            region = data["region"]
+            lat = cords_data["lat"]
+            lon = cords_data["lon"]
+
+            air_quality_data = fetch_air_quality(cords_data["lat"], cords_data["lon"])
+            city_id = get_or_create_city(conn, city_name, lat, lon, country, region)
             insert_air_quality(conn, city_id, air_quality_data)
             logging.info(f"Information about city {city_name} successfully saved!")
 
