@@ -2,9 +2,15 @@ import requests
 import json
 import sys
 import os
+import logging
 
+logging.basicConfig(
+    filename="logs/air_quality.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
 
 from db import get_connection
 
@@ -63,7 +69,7 @@ def get_or_create_city(conn, city_name: str, lat: float, lon: float):
 
 def main():
     conn = get_connection()
-    print("Connecting successfully:", conn)
+    logging.info("Connecting successfully")
 
     with open('data/cities.json', 'r', encoding='utf-8') as f:
         my_data_list =json.load(f)
@@ -76,14 +82,15 @@ def main():
             air_quality_data = fetch_air_quality(lat, lon)
             city_id = get_or_create_city(conn, city_name, lat, lon)
             insert_air_quality(conn, city_id, air_quality_data)
+            logging.info(f"Information about city {city_name} successfully saved!")
 
     except Exception  as e:
-        print(f'Error {e}')
+        logging.error(f"Error {e}")
         conn.rollback()
 
     finally:
         conn.close()
-        print('Connection with bd closed!')
+        logging.info("Connection with bd closed!")
 
     
 if __name__ == "__main__":
