@@ -8,11 +8,6 @@ from datetime import datetime
 load_dotenv()
 api_key = os.getenv("TOMTOM_API_KEY").strip()
 
-logging.basicConfig(
-    filename='logs/traffic.log',
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
 
@@ -62,6 +57,12 @@ def insert_traffic_data(conn, city_id: int, traffic_data:dict):
         conn.commit()
 
 def main():
+
+    logging.basicConfig(
+    filename='logs/traffic.log',
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+    )
 
     conn = get_connection()
     logging.info("Connecting successfully")

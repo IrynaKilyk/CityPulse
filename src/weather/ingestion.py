@@ -3,12 +3,6 @@ import sys
 import os
 import logging
 
-logging.basicConfig(
-     filename="logs/weather.log",
-     level=logging.INFO,
-     format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))# reminder to fix it
 
 from db import get_connection, get_or_create_city
@@ -62,34 +56,40 @@ def insert_weather_data(conn, city_id: int, weather_data: dict):
 
 def main():
         
-        conn = get_connection()
-        logging.info(f"Connecting successfully")
+    logging.basicConfig(
+    filename="logs/weather.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+    )
         
-        try:
-            for data in TARGET_LOCATIONS:
-                cords_data = get_coordinates(data["city"], data["region"], data["country"])
-                if not cords_data:
-                        continue
+    conn = get_connection()
+    logging.info("Connecting successfully")
+        
+    try:
+        for data in TARGET_LOCATIONS:
+            cords_data = get_coordinates(data["city"], data["region"], data["country"])
+            if not cords_data:
+                continue
             
-                city_name = data["city"]
-                country = data["country"]
-                region = data["region"]
-                lat = cords_data["lat"]
-                lon = cords_data["lon"]
+        city_name = data["city"]
+        country = data["country"]
+        region = data["region"]
+        lat = cords_data["lat"]
+        lon = cords_data["lon"]
             
-                weather_data = fetch_weather(cords_data["lat"], cords_data["lon"])
-                city_id = get_or_create_city(conn, city_name, lat, lon, country, region)
-                insert_weather_data(conn, city_id, weather_data)
-                logging.info(f"Information about city {city_name} successfully saved!")
+        weather_data = fetch_weather(cords_data["lat"], cords_data["lon"])
+        city_id = get_or_create_city(conn, city_name, lat, lon, country, region)
+        insert_weather_data(conn, city_id, weather_data)
+        logging.info(f"Information about city {city_name} successfully saved!")
                 
-        except Exception as e:
-                logging.error(f'error: {e}')
-                conn.rollback()
-                sys.exit(1)
+    except Exception as e:
+        logging.error(f'error: {e}')
+        conn.rollback()
+        sys.exit(1)
                 
-        finally:
-                conn.close()
-                logging.info('Connection with bd closed!')
+    finally:
+        conn.close()
+        logging.info('Connection with bd closed!')
                 
     
 if __name__ == "__main__":
