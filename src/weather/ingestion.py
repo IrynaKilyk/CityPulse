@@ -18,7 +18,7 @@ def fetch_weather(lat: float, lon: float):
         "current": "temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code"
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
 

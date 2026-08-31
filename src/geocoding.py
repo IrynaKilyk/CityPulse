@@ -8,7 +8,7 @@ def get_coordinates(city_name: str, target_region:str, target_country:str):
         "name": city_name,
         "count": 10,
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
     

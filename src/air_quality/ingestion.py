@@ -17,7 +17,7 @@ def fetch_air_quality(lat:float, lon:float):
         "current": "pm10,pm2_5,carbon_monoxide"
     }
 
-    response =  requests.get(url, params=params)
+    response =  requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
     pm10 = data["current"]["pm10"]
