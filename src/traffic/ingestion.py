@@ -6,7 +6,12 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 load_dotenv()
-api_key = os.getenv("TOMTOM_API_KEY").strip()
+
+api_key = os.getenv("TOMTOM_API_KEY")
+if not api_key:
+    raise ValueError("TOMTOM_API_KEY is not set")
+
+api_key = api_key.strip()
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
