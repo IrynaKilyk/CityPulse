@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 load_dotenv()
-api_key = os.getenv("TOMTOM_API_KEY").strip()
 
-logging.basicConfig(
-    filename='logs/traffic.log',
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+api_key = os.getenv("TOMTOM_API_KEY")
+if not api_key:
+    raise ValueError("TOMTOM_API_KEY is not set")
+
+api_key = api_key.strip()
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
 
@@ -28,7 +28,7 @@ def fetch_traffic_data(lat:float, lon:float):
         "key": api_key,
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
     segment_data = data["flowSegmentData"]
@@ -63,6 +63,12 @@ def insert_traffic_data(conn, city_id: int, traffic_data:dict):
 
 def main():
 
+    logging.basicConfig(
+    filename='logs/traffic.log',
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
     conn = get_connection()
     logging.info("Connecting successfully")
 
@@ -88,6 +94,7 @@ def main():
     except Exception  as e:
         logging.error(f"Error {e}")
         conn.rollback()
+        sys.exit(1)
 
     finally:
         conn.close()

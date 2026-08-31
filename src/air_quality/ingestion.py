@@ -3,12 +3,6 @@ import sys
 import os
 import logging
 
-logging.basicConfig(
-    filename="logs/air_quality.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
 
 from geocoding import get_coordinates
@@ -23,7 +17,7 @@ def fetch_air_quality(lat:float, lon:float):
         "current": "pm10,pm2_5,carbon_monoxide"
     }
 
-    response =  requests.get(url, params=params)
+    response =  requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
     pm10 = data["current"]["pm10"]
@@ -55,6 +49,12 @@ def insert_air_quality(conn, city_id: int, air_quality_data:dict):
 
 
 def main():
+
+    logging.basicConfig(
+    filename='logs/traffic.log',
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     conn = get_connection()
     logging.info("Connecting successfully")
 
@@ -79,6 +79,7 @@ def main():
     except Exception  as e:
         logging.error(f"Error {e}")
         conn.rollback()
+        sys.exit(1)
 
     finally:
         conn.close()

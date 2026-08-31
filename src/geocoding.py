@@ -2,19 +2,13 @@ import requests
 import logging
 
 
-logging.basicConfig(
-    filename="logs/geocoding.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
 def get_coordinates(city_name: str, target_region:str, target_country:str):
     url = "https://geocoding-api.open-meteo.com/v1/search"
     params = {
         "name": city_name,
         "count": 10,
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
     
