@@ -88,6 +88,7 @@ def main():
     except Exception  as e:
         logging.error(f"Error {e}")
         conn.rollback()
+        sys.exit(1)
 
     finally:
         conn.close()
