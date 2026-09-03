@@ -1,13 +1,10 @@
 import requests
 import sys
 import os
-import logging
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
 
-from geocoding import get_coordinates
-from db import get_connection, get_or_create_city
-from config import TARGET_LOCATIONS
+from ingestion_runner import run_ingestion
 
 def fetch_air_quality(lat:float, lon:float):
     url = "https://air-quality-api.open-meteo.com/v1/air-quality"
@@ -50,41 +47,7 @@ def insert_air_quality(conn, city_id: int, air_quality_data:dict):
 
 def main():
 
-    logging.basicConfig(
-    filename='logs/traffic.log',
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-    conn = get_connection()
-    logging.info("Connecting successfully")
-
- 
-    try:
-        for data in TARGET_LOCATIONS:
-            cords_data = get_coordinates(data["city"], data["region"], data["country"])
-            if not cords_data:
-                continue
-
-            city_name = data["city"]
-            country = data["country"]
-            region = data["region"]
-            lat = cords_data["lat"]
-            lon = cords_data["lon"]
-
-            air_quality_data = fetch_air_quality(cords_data["lat"], cords_data["lon"])
-            city_id = get_or_create_city(conn, city_name, lat, lon, country, region)
-            insert_air_quality(conn, city_id, air_quality_data)
-            logging.info(f"Information about city {city_name} successfully saved!")
-
-    except Exception  as e:
-        logging.error(f"Error {e}")
-        conn.rollback()
-        sys.exit(1)
-
-    finally:
-        conn.close()
-        logging.info("Connection with bd closed!")
-
+    run_ingestion(fetch_air_quality, insert_air_quality, 'logs/air_quality.log', 'air quality')
     
 if __name__ == "__main__":
     main()    

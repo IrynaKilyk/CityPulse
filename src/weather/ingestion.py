@@ -1,14 +1,10 @@
 import requests
 import sys
 import os
-import logging
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))# reminder to fix it
 
-from db import get_connection, get_or_create_city
-from geocoding import get_coordinates
-from config import TARGET_LOCATIONS
-
+from ingestion_runner import run_ingestion
 
 def fetch_weather(lat: float, lon: float):
     url = "https://api.open-meteo.com/v1/forecast"
@@ -56,40 +52,7 @@ def insert_weather_data(conn, city_id: int, weather_data: dict):
 
 def main():
         
-    logging.basicConfig(
-    filename="logs/weather.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-        
-    conn = get_connection()
-    logging.info("Connecting successfully")
-        
-    try:
-        for data in TARGET_LOCATIONS:
-            cords_data = get_coordinates(data["city"], data["region"], data["country"])
-            if not cords_data:
-                continue
-            
-        city_name = data["city"]
-        country = data["country"]
-        region = data["region"]
-        lat = cords_data["lat"]
-        lon = cords_data["lon"]
-            
-        weather_data = fetch_weather(cords_data["lat"], cords_data["lon"])
-        city_id = get_or_create_city(conn, city_name, lat, lon, country, region)
-        insert_weather_data(conn, city_id, weather_data)
-        logging.info(f"Information about city {city_name} successfully saved!")
-                
-    except Exception as e:
-        logging.error(f'error: {e}')
-        conn.rollback()
-        sys.exit(1)
-                
-    finally:
-        conn.close()
-        logging.info('Connection with bd closed!')
+    run_ingestion(fetch_weather,insert_weather_data, "logs/weather.log",'weather')
                 
     
 if __name__ == "__main__":
