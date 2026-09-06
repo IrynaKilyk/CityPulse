@@ -1,19 +1,23 @@
 # CityPulse
-a data engineering project for collecting, processing, and analyzing urban from multiple sources
+## A data engineering project for collecting, processing, and analyzing urban data (weather, air quality, and traffic) from multiple external sources.
 
 ## Current Scope
-- Weather data ingestion
-- API integration
-- Data validation
-- CSV storage
-- Logging
+- Weather data ingestion (Open-Meteo)
+- Air quality data ingestion (Open-Meteo Air Quality API)
+- Traffic data ingestion (TomTom Traffic API)
+- Geocoding (city name → coordinates), with country/region matching
+- API response validation with Pydantic
+- Logging per data source
+- Schema management via Alembic migrations
 
 ## Tech stack
 - Python
 - PostgresSQL
-- Docker
-- Airflow
+- Docker / Docker Compose
 - Alembic (database migrations)
+- Pydantic (data validation)
+- Ruff (linting and formatting)
+- Airflow (planned — not yet integrated)
 
 ## Setup
 
@@ -29,36 +33,41 @@ a data engineering project for collecting, processing, and analyzing urban from 
 ```
 
 3. Copy `.dist.env` to `.env` and fill in your local database credentials.
-
-4. Start the database:
-```powershell
+Start the database:
    docker-compose up -d
-```
-
-5. Apply database migrations:
-```powershell
+Apply database migrations:
    alembic upgrade head
-```
 
 ## Database migrations
 
-Schema changes are managed with Alembic, not by editing the `.sql` files directly.
+Schema changes are managed with Alembic — it is the single source of truth for the database schema.
 
-- `database/*.sql` — reference schema (what the DB looks like on a fresh setup)
-- `alembic/versions/` — history of schema changes applied over time
+- `alembic/versions/` — full history of schema changes
 
 To create a new migration after changing the schema:
+
 ```powershell
 alembic revision -m "short description of the change"
 ```
-Then edit the generated file in `alembic/versions/` and write the change in `upgrade()` (and its reverse in `downgrade()`).
-
 To apply migrations:
+
 ```powershell
 alembic upgrade head
 ```
 
 To check the current migration state:
+
 ```powershell
 alembic current
 ```
+
+## Linting
+
+This project uses Ruff for linting and import sorting.
+
+```powershell
+ruff check src/
+ruff check --fix src/
+```
+
+Line endings are normalized to LF via `.gitattributes`.
