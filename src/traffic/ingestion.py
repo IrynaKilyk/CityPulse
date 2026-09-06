@@ -1,7 +1,9 @@
-import requests
 import os
+from datetime import datetime, timezone
+
+import requests
 from dotenv import load_dotenv
-from datetime import datetime
+
 from ..ingestion_runner import run_ingestion
 
 load_dotenv()
@@ -26,7 +28,7 @@ def fetch_traffic_data(lat:float, lon:float):
     segment_data = data["flowSegmentData"]
 
     traffic_data ={
-       "recorded_at": datetime.now(),
+       "recorded_at": datetime.now(tz=timezone.utc),
         "current_speed": segment_data['currentSpeed'],
         "free_flow_speed": segment_data['freeFlowSpeed'],
         "current_travel_time": segment_data['currentTravelTime'],

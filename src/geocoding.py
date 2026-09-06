@@ -1,6 +1,8 @@
-import requests
 import logging
 
+import requests
+
+logger = logging.getLogger(__name__)
 
 def get_coordinates(city_name: str, target_region:str, target_country:str):
     url = "https://geocoding-api.open-meteo.com/v1/search"
@@ -13,7 +15,7 @@ def get_coordinates(city_name: str, target_region:str, target_country:str):
     data = response.json()
     
     if "results" not in data:
-        logging.warning(f"City '{city_name}' not found in API")
+        logger.warning(f"City '{city_name}' not found in API")
         return None
     
     for item in data["results"]:
@@ -34,6 +36,6 @@ def get_coordinates(city_name: str, target_region:str, target_country:str):
             }
             return geocoding_result
         
-    logging.warning(f"City '{city_name} found, but not in {target_country} or {target_region}")
+    logger.warning(f"City '{city_name} found, but not in {target_country} or {target_region}")
     return None
 

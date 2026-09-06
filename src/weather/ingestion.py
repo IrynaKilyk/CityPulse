@@ -1,5 +1,7 @@
 import requests
+
 from ..ingestion_runner import run_ingestion
+
 
 def fetch_weather(lat: float, lon: float):
     url = "https://api.open-meteo.com/v1/forecast"
