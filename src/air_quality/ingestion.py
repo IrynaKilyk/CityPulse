@@ -1,7 +1,14 @@
 import requests
+from pydantic import BaseModel
 
 from ..ingestion_runner import run_ingestion
 
+
+class AirQualityResponse(BaseModel):
+    pm10: float
+    time: str
+    pm2_5: float
+    carbon_monoxide: float
 
 def fetch_air_quality(lat:float, lon:float):
     url = "https://air-quality-api.open-meteo.com/v1/air-quality"
@@ -14,16 +21,13 @@ def fetch_air_quality(lat:float, lon:float):
     response =  requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
-    pm10 = data["current"]["pm10"]
-    time = data["current"]['time']
-    pm2_5 = data["current"]["pm2_5"]
-    carbon_monoxide = data["current"]["carbon_monoxide"]
 
+    air_quality_response = AirQualityResponse(**data["current"])
     air_quality_data = {
-        "pm10": pm10,
-        "pm2_5": pm2_5,
-        "carbon_monoxide": carbon_monoxide,
-        "recorded_at": time
+        "pm10": air_quality_response.pm10,
+        "pm2_5": air_quality_response.pm2_5,
+        "carbon_monoxide": air_quality_response.carbon_monoxide,
+        "recorded_at": air_quality_response.time
     }
     return air_quality_data
 

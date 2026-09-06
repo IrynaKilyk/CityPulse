@@ -3,8 +3,18 @@ from datetime import datetime, timezone
 
 import requests
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 from ..ingestion_runner import run_ingestion
+
+
+class TrafficResponse(BaseModel):
+    currentSpeed: int
+    freeFlowSpeed: int
+    currentTravelTime: int
+    freeFlowTravelTime: int
+    roadClosure: bool
+    
 
 load_dotenv()
 
@@ -27,13 +37,15 @@ def fetch_traffic_data(lat:float, lon:float):
     data = response.json()
     segment_data = data["flowSegmentData"]
 
+    traffic_response = TrafficResponse(**segment_data)
+
     traffic_data ={
        "recorded_at": datetime.now(tz=timezone.utc),
-        "current_speed": segment_data['currentSpeed'],
-        "free_flow_speed": segment_data['freeFlowSpeed'],
-        "current_travel_time": segment_data['currentTravelTime'],
-        "free_flow_travel_time": segment_data['freeFlowTravelTime'],
-        "road_closure": segment_data['roadClosure']
+        "current_speed": traffic_response.currentSpeed,
+        "free_flow_speed": traffic_response.freeFlowSpeed,
+        "current_travel_time": traffic_response.currentTravelTime,
+        "free_flow_travel_time": traffic_response.freeFlowTravelTime,
+        "road_closure": traffic_response.roadClosure
     }
 
     return traffic_data
