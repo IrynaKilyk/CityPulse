@@ -1,8 +1,8 @@
 import requests
-import sys
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+from ..ingestion_runner import run_ingestion
 
 load_dotenv()
 
@@ -11,11 +11,6 @@ if not api_key:
     raise ValueError("TOMTOM_API_KEY is not set")
 
 api_key = api_key.strip()
-
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
-from ingestion_runner import run_ingestion
-
 
 def fetch_traffic_data(lat:float, lon:float):
 
@@ -60,7 +55,7 @@ def insert_traffic_data(conn, city_id: int, traffic_data:dict):
 
 def main():
 
-    run_ingestion(fetch_traffic_data, insert_traffic_data,'logs/traffic.log', "Traffic" )
+    run_ingestion(fetch_traffic_data, insert_traffic_data,'logs/traffic.log', "traffic" )
 
     
 if __name__ == "__main__":

@@ -1,9 +1,8 @@
 import sys
 import logging
-from db import get_connection, get_or_create_city
-from geocoding import get_coordinates
-from config import TARGET_LOCATIONS
-
+from .db import get_connection, get_or_create_city
+from .geocoding import get_coordinates
+from .config import TARGET_LOCATIONS
 
 def run_ingestion(fetch_fn, insert_fn, log_filename, source_name):
     logging.basicConfig(

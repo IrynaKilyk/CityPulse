@@ -1,10 +1,5 @@
 import requests
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))# reminder to fix it
-
-from ingestion_runner import run_ingestion
+from ..ingestion_runner import run_ingestion
 
 def fetch_weather(lat: float, lon: float):
     url = "https://api.open-meteo.com/v1/forecast"

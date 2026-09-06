@@ -1,10 +1,6 @@
 import requests
-import sys
-import os
+from ..ingestion_runner import run_ingestion
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # reminder to fix it
-
-from ingestion_runner import run_ingestion
 
 def fetch_air_quality(lat:float, lon:float):
     url = "https://air-quality-api.open-meteo.com/v1/air-quality"
