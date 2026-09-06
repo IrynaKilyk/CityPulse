@@ -1,8 +1,17 @@
 import requests
+from pydantic import BaseModel
 
 from ..ingestion_runner import run_ingestion
 
 
+class WeatherResponse(BaseModel):
+    temperature_2m: float
+    time: str
+    relative_humidity_2m: float 
+    wind_speed_10m: float
+    weather_code: int
+
+    
 def fetch_weather(lat: float, lon: float):
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -15,18 +24,15 @@ def fetch_weather(lat: float, lon: float):
     response.raise_for_status()
     data = response.json()
 
-    temperature = data["current"]["temperature_2m"] 
-    time = data["current"]["time"]
-    relative_humidity = data["current"]["relative_humidity_2m"]
-    wind_speed = data["current"]["wind_speed_10m"]
-    weather_code = data["current"]["weather_code"]
+    weather_response = WeatherResponse(**data["current"])
+
 
     weather_data = {
-    "temperature": temperature,
-    "time": time,
-    "relative_humidity": relative_humidity,
-    "wind_speed": wind_speed,
-    "weather_code": weather_code
+    "temperature": weather_response.temperature_2m,
+    "time": weather_response.time,
+    "relative_humidity": weather_response.relative_humidity_2m,
+    "wind_speed": weather_response.wind_speed_10m,
+    "weather_code": weather_response.weather_code
     }
     return weather_data
 

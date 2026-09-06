@@ -19,15 +19,20 @@ def run_ingestion(fetch_fn, insert_fn, log_filename, source_name):
             
     try:
         for data in TARGET_LOCATIONS:
-            cords_data = get_coordinates(data["city"], data["region"], data["country"])
-            if not cords_data:
+            coords_data = get_coordinates(data["city"], data["region"], data["country"])
+            if not coords_data:
                 continue
-                
-            data_item = fetch_fn(cords_data["lat"], cords_data["lon"])
-            city_id = get_or_create_city(conn, data["city"], cords_data["lat"], cords_data["lon"], data["country"], data["region"])
-            insert_fn(conn, city_id, data_item)
-            logger.info(f"[{source_name}] Information about city {data['city']} successfully saved!")
-                    
+            try:
+                data_item = fetch_fn(coords_data["lat"], coords_data["lon"])
+                city_id = get_or_create_city(conn, data["city"], coords_data["lat"], coords_data["lon"], data["country"], data["region"])
+                insert_fn(conn, city_id, data_item)
+                logger.info(f"[{source_name}] Information about city {data['city']} successfully saved!")
+
+            except Exception as e: # noqa: BLE001
+                logger.error(f"[{source_name}] Failed to process city {data['city']}: {e}")
+                conn.rollback()
+                continue      
+            
     except Exception as e: # noqa: BLE001
         logger.error(f'error: {e}')
         conn.rollback()
